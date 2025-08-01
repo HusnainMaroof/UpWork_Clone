@@ -1,5 +1,5 @@
-import { sendOTP } from "../Extras/OTP.js"
-import { Users } from "../Models/usersModels.js"
+import { sendOTP } from "../extras/OTP.js"
+import { Users } from "../models/usersModels.js"
 import bcrypt from "bcrypt"
 import otpgenerator from "otp-generator"
 
