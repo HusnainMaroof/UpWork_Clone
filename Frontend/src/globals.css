@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+.side_padding {
+  padding: 20px 24px ;
+}
