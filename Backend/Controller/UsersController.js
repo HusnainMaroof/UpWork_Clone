@@ -6,10 +6,10 @@ import otpgenerator from "otp-generator"
 export const registerUsers = async (req, res) => {
 
 
-    const { f_name, l_name, email, password, country, terms, m_mail } = req.body
+    const { f_name, l_name, email, password, country, terms, mails, role } = req.body
 
 
-    if (!f_name, !l_name, !email, !password, !country, !terms, !m_mail) {
+    if (!f_name, !l_name, !email, !password, !country, !terms, !mails, !role) {
         res.status(401)
         throw new Error('Please enter all the relavent fields')
     }
@@ -33,7 +33,7 @@ export const registerUsers = async (req, res) => {
 
 
     const createUsers = await Users.create({
-        f_name, l_name, email, password: hashPassword, country, terms, m_mail
+        f_name, l_name, email, password: hashPassword, country, terms, mails, role, otp
     })
 
 

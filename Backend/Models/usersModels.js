@@ -27,11 +27,16 @@ const usersScheema = mongoose.Schema({
     terms: {
         type: String,
         required: true,
-    }, m_mail: {
+    },
+    mails: {
         type: String,
     },
     otp: {
         type: String
+    },
+    role: {
+        type: String,
+        required: true
     }
 
 

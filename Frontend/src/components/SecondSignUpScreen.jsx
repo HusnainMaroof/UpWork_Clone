@@ -1,12 +1,18 @@
 import TextField from "@mui/material/TextField";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
-
+import { PuffLoader } from "react-spinners";
+import axios from "axios";
+import Select from "react-select";
+import toast, { Toaster } from "react-hot-toast";
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { regUsers } from "../features/auth/authSlice";
 
 const SecondSignUpScreen = ({ role, setRole }) => {
   const [showpass, setShowPass] = useState(false);
   const [passError, setPassError] = useState("");
-
+  const [countriesData, setCountriesData] = useState([]);
+  const [country, setCountry] = useState("");
   const [formFields, setFormFields] = useState({
     f_name: "",
     l_name: "",
@@ -49,15 +55,68 @@ const SecondSignUpScreen = ({ role, setRole }) => {
     }
   }, [password]);
 
-  console.log(passError);
+  useEffect(() => {
+    const fetchCountries = async () => {
+      const countriesApi =
+        "https://gist.githubusercontent.com/portapipe/a28cd7a9f8aa3409af9171480efcc090/raw/";
+      try {
+        const { data } = await axios.get(countriesApi);
+        setCountriesData(data);
+      } catch (error) {
+        toast.error(error);
+      }
+    };
+    fetchCountries();
+  }, []);
 
+  const customStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? "transparent" // no blue when selected
+        : state.isFocused
+        ? "#f3f4f6" // Tailwind gray-100 on hover
+        : "transparent",
+      color: "black",
+      cursor: "pointer",
+      userSelect: "none",
+    }),
+    control: (provided) => ({
+      ...provided,
+      minHeight: "55px",
+      padding: "2px 4px",
+      borderRadius: "8px",
+      borderColor: "#d1d5db",
+      boxShadow: "none",
+      "&:hover": {
+        borderColor: "#9ca3af",
+        borderWidth: 2,
+      },
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      padding: "0 8px",
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      userSelect: "none",
+    }),
+  };
+
+  const dispatch = useDispatch();
+
+  const handelSubmitData = async () => {
+    dispatch(
+      regUsers({ f_name, l_name, email, password, country, terms, mails, role })
+    );
+  };
   return (
     <>
       <div className="h-screen w-full">
         <div className="flex items-center justify-between side_padding">
           <img src="/svgs/logo.svg" alt="" width={100} />
 
-          <div className="flex items-center gap-3">
+          <div className=" items-center gap-3 hidden md:flex">
             <h4 className=" text-lg">here to hire talet?</h4>
 
             <button
@@ -105,6 +164,18 @@ const SecondSignUpScreen = ({ role, setRole }) => {
                   label="First Name"
                   variant="outlined"
                   className="w-full"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: `f3f4f6`,
+                        borderRadius: "8px",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#9ca3af",
+                        borderWidth: 2,
+                      },
+                    },
+                  }}
                 />
                 <TextField
                   name="l_name"
@@ -113,9 +184,20 @@ const SecondSignUpScreen = ({ role, setRole }) => {
                   label="Last Name"
                   variant="outlined"
                   className="w-full "
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: `f3f4f6`,
+                        borderRadius: "8px",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#9ca3af",
+                        borderWidth: 2,
+                      },
+                    },
+                  }}
                 />
               </div>
-
               {/* Email */}
               <div className="mb-5">
                 <TextField
@@ -131,9 +213,20 @@ const SecondSignUpScreen = ({ role, setRole }) => {
                   }
                   variant="outlined"
                   className="w-full  "
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: `f3f4f6`,
+                        borderRadius: "8px",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#9ca3af",
+                        borderWidth: 2,
+                      },
+                    },
+                  }}
                 />
               </div>
-
               {/* Password */}
               <div className="mb- relative">
                 <TextField
@@ -148,10 +241,11 @@ const SecondSignUpScreen = ({ role, setRole }) => {
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       "& fieldset": {
-                        borderColor: `gray`,
+                        borderColor: `f3f4f6`,
+                        borderRadius: "8px",
                       },
                       "&:hover fieldset": {
-                        borderColor: "black",
+                        borderColor: "#9ca3af",
                         borderWidth: 2,
                       },
                       "&.Mui-focused fieldset": {
@@ -187,30 +281,43 @@ const SecondSignUpScreen = ({ role, setRole }) => {
               >
                 {passError}
               </p>
-
               {/* Country */}
-              <select
-                name="country"
-                className="w-full mt-3 border border-gray-300 rounded-md px-3 py-3"
-              >
-                <option value="Pakistan">Pakistan</option>
-                <option value="India">India</option>
-                <option value="USA">USA</option>
-              </select>
-
+              <Select
+                styles={customStyles}
+                placeholder="Select your country"
+                className="placeholder:text-gray-900"
+                options={countriesData.map((item) => ({
+                  value: item.code,
+                  label: (
+                    <div className="flex items-center gap-2 select-none">
+                      <img
+                        src={`data:image/png;base64,${item.flag}`}
+                        alt="flag"
+                        className="w-6 h-4"
+                      />
+                      <span>{item.name}</span>
+                    </div>
+                  ),
+                  countryData: item,
+                }))}
+                onChange={(selected) => {
+                  if (selected) {
+                    setCountry(selected.countryData.name);
+                  }
+                }}
+              />
               <label className="flex items-start text-sm mt-3 gap-2">
                 <input
                   name="mails"
                   value={mails}
                   onChange={handleChange}
                   type="checkbox"
-                  className="mt-1"
+                  className="mt-1 border-green-700 py"
                 />
                 <span>
                   Send me helpful emails to find rewarding work and job leads.
                 </span>
               </label>
-
               <label className="flex items-start text-sm gap-2 mt-3">
                 <input
                   name="terms"
@@ -221,15 +328,15 @@ const SecondSignUpScreen = ({ role, setRole }) => {
                 />
                 <span>
                   Yes, I understand and agree to the{" "}
-                  <a href="#" className="text-blue-600 underline">
+                  <a href="#" className="text-green-600 underline">
                     Upwork Terms of Service
                   </a>
                   , including the{" "}
-                  <a href="#" className="text-blue-600 underline">
+                  <a href="#" className="text-green-600 underline">
                     User Agreement
                   </a>{" "}
                   and{" "}
-                  <a href="#" className="text-blue-600 underline">
+                  <a href="#" className="text-green-600 underline">
                     Privacy Policy
                   </a>
                   .
@@ -237,13 +344,18 @@ const SecondSignUpScreen = ({ role, setRole }) => {
               </label>
             </div>
 
-            <button className="w-full mt-5 bg-green-600 text-white py-2 rounded-md hover:bg-green-700">
+            <button
+              onClick={handelSubmitData}
+              type="button"
+              className="w-full mt-5 flex items-center justify-center bg-green-600 text-white py-2 rounded-md hover:bg-green-700"
+            >
               Create my account
+              <PuffLoader size={20} />
             </button>
 
             {/* Log in link */}
             <p className="text-center mt-4 text-sm">
-              Already have an account?{" "}
+              Already have an account?
               <a href="#" className="text-green-600 underline">
                 Log In
               </a>

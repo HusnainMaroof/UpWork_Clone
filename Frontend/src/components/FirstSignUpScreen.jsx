@@ -20,7 +20,7 @@ const FirstSignUpScreen = () => {
               <div className="flex flex-col md:flex-row items-center gap-5">
                 <div
                   onClick={() => setRole("client")}
-                  className={`border active:scale-95 hover:bg-[#F9F9F9]    p-5 ${
+                  className={`border active:scale-95 hover:bg-[#F9F9F9] w-full   p-5 ${
                     role == "client"
                       ? "border-black outline-2 "
                       : "border-gray-500"
@@ -66,7 +66,7 @@ const FirstSignUpScreen = () => {
 
                 <div
                   onClick={() => setRole("freelancer")}
-                  className={`border active:scale-95 hover:bg-[#F9F9F9] p-5 ${
+                  className={`border active:scale-95 hover:bg-[#F9F9F9] p-5 w-full ${
                     role == "freelancer"
                       ? "border-black  outline-2"
                       : "border-gray-500"

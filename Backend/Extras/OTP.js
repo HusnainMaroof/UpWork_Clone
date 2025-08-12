@@ -1,12 +1,6 @@
 
-
 import nodemailer from "nodemailer"
-
-
 export const sendOTP = (email, otp) => {
-
-
-
 
     let transpoter = nodemailer.createTransport({
         service: "gmail",
