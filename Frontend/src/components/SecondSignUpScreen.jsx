@@ -5,21 +5,32 @@ import axios from "axios";
 import Select from "react-select";
 import toast, { Toaster } from "react-hot-toast";
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { regUsers } from "../features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { regUser, userReset } from "../features/auth/authSlice";
+import { FaCheck } from "react-icons/fa";
+import { BsExclamationCircle } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 
 const SecondSignUpScreen = ({ role, setRole }) => {
+  const dispatch = useDispatch();
+
+  const { user, userLoading, userError, userSuccess, userMessage } =
+    useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
   const [showpass, setShowPass] = useState(false);
   const [passError, setPassError] = useState("");
   const [countriesData, setCountriesData] = useState([]);
   const [country, setCountry] = useState("");
+  const [formSubmitted, setFormSubmitted] = useState(false);
+
   const [formFields, setFormFields] = useState({
     f_name: "",
     l_name: "",
     email: "",
     password: "",
     mails: false,
-    terms: true,
+    terms: false,
   });
 
   const { f_name, l_name, email, password, mails, terms } = formFields;
@@ -39,6 +50,8 @@ const SecondSignUpScreen = ({ role, setRole }) => {
     }
   };
 
+  // passwords rules
+
   useEffect(() => {
     const minLengthRegex = /^.{8,}$/;
     const letterAndNumOrSpecialRegex = /^(?=.*[A-Za-z])(?=.*[\d\W]).+$/;
@@ -55,6 +68,8 @@ const SecondSignUpScreen = ({ role, setRole }) => {
     }
   }, [password]);
 
+  // fetching  all coutreies
+
   useEffect(() => {
     const fetchCountries = async () => {
       const countriesApi =
@@ -68,6 +83,8 @@ const SecondSignUpScreen = ({ role, setRole }) => {
     };
     fetchCountries();
   }, []);
+
+  //custom styling from countries
 
   const customStyles = {
     option: (provided, state) => ({
@@ -88,6 +105,7 @@ const SecondSignUpScreen = ({ role, setRole }) => {
       borderRadius: "8px",
       borderColor: "#d1d5db",
       boxShadow: "none",
+      cursor: "pointer",
       "&:hover": {
         borderColor: "#9ca3af",
         borderWidth: 2,
@@ -101,15 +119,34 @@ const SecondSignUpScreen = ({ role, setRole }) => {
       ...provided,
       userSelect: "none",
     }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "gray",
+      fontWeight: 500,
+      cursor: "pointer",
+    }),
   };
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    let userEmail = JSON.parse(localStorage.getItem("user"));
+    if (userError) {
+      toast.error(userMessage);
+    } else if (userSuccess) {
+      toast.success(`we have send an otp to your Email : ${userEmail.email} `);
+    navigate("/otp-verification");
+    }
+    dispatch(userReset());
+  }, [userError, userSuccess]);
 
+  // handling submit button
   const handelSubmitData = async () => {
+    setFormSubmitted(true);
+
     dispatch(
-      regUsers({ f_name, l_name, email, password, country, terms, mails, role })
+      regUser({ f_name, l_name, email, password, country, terms, mails, role })
     );
   };
+
   return (
     <>
       <div className="h-screen w-full">
@@ -154,52 +191,167 @@ const SecondSignUpScreen = ({ role, setRole }) => {
               <hr className="flex-grow border-gray-300" />
             </div>
 
-            {/* First & Last Name */}
-            <div>
-              <div className="flex gap-3 mb-5">
-                <TextField
-                  name="f_name"
-                  value={f_name}
-                  onChange={handleChange}
-                  label="First Name"
-                  variant="outlined"
-                  className="w-full"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: `f3f4f6`,
-                        borderRadius: "8px",
+            <div className="">
+              {/* First Name and Last Name */}
+
+              <div className="flex flex-col lg:flex-row gap-3 my-4 ">
+                <div className="w-full relative">
+                  <TextField
+                    name="f_name"
+                    value={f_name}
+                    onChange={handleChange}
+                    label="First Name"
+                    variant="outlined"
+                    className="w-full"
+                    placeholder="Enter First name"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "& input::placeholder": {
+                          color: `${
+                            formSubmitted && f_name.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`, // default placeholder
+                          opacity: 1,
+                        },
+                        "&.Mui-focused input::placeholder": {
+                          color: `${
+                            formSubmitted && f_name.trim() === ""
+                              ? "red"
+                              : "green"
+                          }`,
+                        },
+                        "& fieldset": {
+                          borderRadius: "8px",
+                          borderColor: `${
+                            formSubmitted && f_name.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`,
+                        },
+                        "&:hover fieldset": {
+                          borderColor: `${
+                            formSubmitted && f_name.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`,
+                          borderWidth: 2,
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: `${
+                            formSubmitted && f_name.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`,
+                          borderWidth: 2,
+                        },
                       },
-                      "&:hover fieldset": {
-                        borderColor: "#9ca3af",
-                        borderWidth: 2,
+                      "& label": {
+                        color: `${
+                          formSubmitted && f_name.trim() === ""
+                            ? "red"
+                            : "#9ca3af"
+                        }`, // default label
                       },
-                    },
-                  }}
-                />
-                <TextField
-                  name="l_name"
-                  value={l_name}
-                  onChange={handleChange}
-                  label="Last Name"
-                  variant="outlined"
-                  className="w-full "
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: `f3f4f6`,
-                        borderRadius: "8px",
+                      "& label.Mui-focused": {
+                        color: `${
+                          formSubmitted && f_name.trim() === ""
+                            ? "red"
+                            : "green"
+                        }`, // label on focus
                       },
-                      "&:hover fieldset": {
-                        borderColor: "#9ca3af",
-                        borderWidth: 2,
+                    }}
+                  />
+
+                  {formSubmitted && f_name.trim() === "" && (
+                    <div className="flex items-center gap-2">
+                      <BsExclamationCircle size={20} color="red" />
+                      <p className="text-red-500 font-semibold py-1.5 text-[16px]">
+                        First name is required
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <TextField
+                    name="l_name"
+                    value={l_name}
+                    onChange={handleChange}
+                    label="Last Name"
+                    placeholder="Enter last name"
+                    variant="outlined"
+                    className="w-full"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "& input::placeholder": {
+                          color: `${
+                            formSubmitted && l_name.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`, // default placeholder
+                          opacity: 1,
+                        },
+                        "&.Mui-focused input::placeholder": {
+                          color: `${
+                            formSubmitted && f_name.trim() === ""
+                              ? "red"
+                              : "green"
+                          }`,
+                        },
+                        "& fieldset": {
+                          borderRadius: "8px",
+                          borderColor: `${
+                            formSubmitted && l_name.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`,
+                        },
+                        "&:hover fieldset": {
+                          borderColor: `${
+                            formSubmitted && l_name.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`,
+                          borderWidth: 2,
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: `${
+                            formSubmitted && l_name.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`,
+                          borderWidth: 2,
+                        },
                       },
-                    },
-                  }}
-                />
+                      "& label": {
+                        color: `${
+                          formSubmitted && l_name.trim() === ""
+                            ? "red"
+                            : "#9ca3af"
+                        }`, // default label
+                      },
+                      "& label.Mui-focused": {
+                        color: `${
+                          formSubmitted && l_name.trim() === ""
+                            ? "red"
+                            : "green"
+                        }`, // label on focus
+                      },
+                    }}
+                  />
+                  {formSubmitted && l_name.trim() === "" && (
+                    <div className="flex items-center gap-2">
+                      <BsExclamationCircle size={20} color="red" />
+                      <p className="text-red-500 font-semibold py-1.5 text-[16px]">
+                        Last Name is required
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
               {/* Email */}
-              <div className="mb-5">
+              <div className="my-4 ">
                 <TextField
                   name="email"
                   value={email}
@@ -212,145 +364,320 @@ const SecondSignUpScreen = ({ role, setRole }) => {
                       : ""
                   }
                   variant="outlined"
+                  placeholder="Enter you Email"
                   className="w-full  "
                   sx={{
                     "& .MuiOutlinedInput-root": {
+                      "& input::placeholder": {
+                        color: `${
+                          formSubmitted && email.trim() === ""
+                            ? "red"
+                            : "#9ca3af"
+                        }`, // default placeholder
+                        opacity: 1,
+                      },
+                      "&.Mui-focused input::placeholder": {
+                        color: `${
+                          formSubmitted && email.trim() === "" ? "red" : "gray"
+                        }`,
+                      },
                       "& fieldset": {
-                        borderColor: `f3f4f6`,
                         borderRadius: "8px",
+                        borderColor: `${
+                          formSubmitted && email.trim() === ""
+                            ? "red"
+                            : "#9ca3af"
+                        }`,
                       },
                       "&:hover fieldset": {
-                        borderColor: "#9ca3af",
-                        borderWidth: 2,
-                      },
-                    },
-                  }}
-                />
-              </div>
-              {/* Password */}
-              <div className="mb- relative">
-                <TextField
-                  name="password"
-                  value={password}
-                  onChange={handleChange}
-                  label="Password"
-                  className="w-full"
-                  type={showpass ? "text" : "password"}
-                  variant="outlined"
-                  placeholder="Password (8 or more characters)"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: `f3f4f6`,
-                        borderRadius: "8px",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#9ca3af",
+                        borderColor: `${
+                          formSubmitted && email.trim() === ""
+                            ? "red"
+                            : "#9ca3af"
+                        }`,
                         borderWidth: 2,
                       },
                       "&.Mui-focused fieldset": {
                         borderColor: `${
-                          passError === ""
-                            ? "#99a1af"
-                            : passError === "You have strong Password!"
-                            ? "green"
-                            : "#c10007"
+                          formSubmitted && email.trim() === ""
+                            ? "red"
+                            : "#9ca3af"
                         }`,
                         borderWidth: 2,
                       },
                     },
+                    "& label": {
+                      color: `${
+                        formSubmitted && email.trim() === "" ? "red" : "#9ca3af"
+                      }`, // default label
+                    },
+                    "& label.Mui-focused": {
+                      color: `${
+                        formSubmitted && email.trim() === "" ? "red" : "green"
+                      }
+                      `, // label on focus
+                    },
                   }}
                 />
-                <div
-                  onClick={() => setShowPass(!showpass)}
-                  className="absolute right-3 top-1/2 -translate-1/2 cursor-pointer"
-                >
-                  {showpass ? (
-                    <IoEyeOutline size={22} />
-                  ) : (
-                    <IoEyeOffOutline size={22} />
+
+                {formSubmitted && email.trim() === "" && (
+                  <div className="flex items-center gap-2">
+                    <BsExclamationCircle size={20} color="red" />
+                    <p className="text-red-500 font-semibold py-1.5 text-[16px]">
+                      {" "}
+                      {role === "freelancer"
+                        ? "Email"
+                        : role === "client"
+                        ? "Work Email address"
+                        : ""}{" "}
+                      is required
+                    </p>
+                  </div>
+                )}
+              </div>
+              {/* Password */}
+              <div className="w-full my-2 ">
+                <div className=" relative">
+                  <TextField
+                    name="password"
+                    value={password}
+                    onChange={handleChange}
+                    label="Password"
+                    className="w-full"
+                    type={showpass ? "text" : "password"}
+                    variant="outlined"
+                    placeholder="Password (8 or more characters)"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "& input::placeholder": {
+                          color: `${
+                            formSubmitted && password.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`, // default placeholder
+                          opacity: 1,
+                        },
+                        "&.Mui-focused input::placeholder": {
+                          color: `${
+                            formSubmitted && password.trim() === ""
+                              ? "red"
+                              : "green"
+                          }`,
+                        },
+                        "& fieldset": {
+                          borderRadius: "8px",
+                          borderColor:
+                            formSubmitted && password.trim() === ""
+                              ? "red"
+                              : passError === ""
+                              ? "#99a1af"
+                              : passError === "You have strong Password!"
+                              ? "green"
+                              : "#c10007",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: `${
+                            formSubmitted && password.trim() === ""
+                              ? "red"
+                              : "#9ca3af"
+                          }`,
+                          borderWidth: 2,
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor:
+                            formSubmitted && password.trim() === ""
+                              ? "red"
+                              : passError === ""
+                              ? "#99a1af"
+                              : passError === "You have strong Password!"
+                              ? "green"
+                              : "#c10007",
+                          borderWidth: 2,
+                        },
+                      },
+                      "& label": {
+                        color: `${
+                          formSubmitted && password.trim() === ""
+                            ? "red"
+                            : "#9ca3af"
+                        }`, // default label
+                      },
+                      "& label.Mui-focused": {
+                        color:
+                          formSubmitted && password.trim() === ""
+                            ? "red"
+                            : passError === ""
+                            ? "green"
+                            : passError === "You have strong Password!"
+                            ? "green"
+                            : "#c10007", // label on focus
+                      },
+                    }}
+                  />
+                  <div
+                    onClick={() => setShowPass(!showpass)}
+                    className="absolute right-3 top-1/2 -translate-1/2 cursor-pointer"
+                  >
+                    {showpass ? (
+                      <IoEyeOutline size={22} />
+                    ) : (
+                      <IoEyeOffOutline size={22} />
+                    )}
+                  </div>
+                </div>
+
+                {formSubmitted && password.trim() === "" ? (
+                  <div className="flex items-center gap-2">
+                    <BsExclamationCircle size={20} color="red" />
+                    <p className="text-red-500 font-semibold py-1.5 text-[16px]">
+                      Password is required
+                    </p>
+                  </div>
+                ) : (
+                  <p
+                    className={`py-2 font-semibold  ${
+                      passError == "You have strong Password!"
+                        ? "text-green-700"
+                        : "text-red-700"
+                    }`}
+                  >
+                    {passError}
+                  </p>
+                )}
+              </div>
+
+              {/* Country */}
+              <div className="cursor-pointer w-full">
+                <Select
+                  styles={customStyles}
+                  placeholder="Select your country"
+                  className="placeholder:text-gray-900 placeholder:font-semibold cursor-pointer"
+                  options={countriesData.map((item) => ({
+                    value: item.code,
+                    label: (
+                      <div className="flex items-center gap-2 select-none">
+                        <img
+                          src={`data:image/png;base64,${item.flag}`}
+                          alt="flag"
+                          className="w-6 h-4"
+                        />
+                        <span>{item.name}</span>
+                      </div>
+                    ),
+                    countryData: item,
+                  }))}
+                  onChange={(selected) => {
+                    if (selected) {
+                      setCountry(selected.countryData.name);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Send Mails */}
+
+              <div className="flex  items-start text-sm gap-2 my-4 select-none">
+                <label className="cursor-pointer mt-1">
+                  <input
+                    name="mails"
+                    value={mails}
+                    onChange={handleChange}
+                    type="checkbox"
+                    className="mt-1 hidden"
+                  />
+
+                  <span
+                    className={`w-4 h-4  p-[2px]  outline-2 rounded-xs outline-gray-500 flex items-center justify-center  ${
+                      mails && "outline-green-700"
+                    } `}
+                  >
+                    <FaCheck
+                      color="green"
+                      className={` opacity-0 ${mails && "opacity-100"} `}
+                    />
+                  </span>
+                </label>
+                <span className="pointer-events-none text-[16px] text-gray-600 font-semibold ">
+                  Send me helpful emails to find rewarding work and job leads.
+                </span>
+              </div>
+              {/* Terms */}
+              <div className="flex flex-col items-start text-sm gap-2 my-4 select-none">
+                <div className="flex  gap-2">
+                  <label className="cursor-pointer mt-1">
+                    <input
+                      name="terms"
+                      value={terms}
+                      onChange={handleChange}
+                      type="checkbox"
+                      className="mt-1 hidden"
+                    />
+
+                    <span
+                      className={`w-4 h-4  p-[2px]  outline-2 rounded-xs outline-gray-500 flex items-center justify-center  ${
+                        formSubmitted && !terms
+                          ? "outline-red-500"
+                          : "outline-green-700"
+                      } `}
+                    >
+                      <FaCheck
+                        color="green"
+                        className={` opacity-0 ${terms && "opacity-100"} `}
+                      />
+                    </span>
+                  </label>
+                  <span className="pointer-events-none text-[16px] text-gray-600 font-semibold ">
+                    Yes, I understand and agree to the{" "}
+                    <a href="#" className="text-green-600 underline">
+                      Upwork Terms of Service
+                    </a>
+                    , including the{" "}
+                    <a href="#" className="text-green-600 underline">
+                      User Agreement
+                    </a>{" "}
+                    and{" "}
+                    <a href="#" className="text-green-600 underline">
+                      Privacy Policy
+                    </a>
+                    .
+                  </span>
+                </div>
+
+                <div className="">
+                  {formSubmitted && !terms && (
+                    <div className="flex items-center justify-center gap-2 ">
+                      {" "}
+                      <BsExclamationCircle size={20} color="red" />
+                      <p className="text-red-500 font-semibold py-1.5 text-[16px]">
+                        Please accept the Upwork Terms of Service before
+                        continuing
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
-              <p
-                className={`py-2 font-semibold  ${
-                  passError == "You have strong Password!"
-                    ? "text-green-700"
-                    : "text-red-700"
-                }`}
-              >
-                {passError}
-              </p>
-              {/* Country */}
-              <Select
-                styles={customStyles}
-                placeholder="Select your country"
-                className="placeholder:text-gray-900"
-                options={countriesData.map((item) => ({
-                  value: item.code,
-                  label: (
-                    <div className="flex items-center gap-2 select-none">
-                      <img
-                        src={`data:image/png;base64,${item.flag}`}
-                        alt="flag"
-                        className="w-6 h-4"
-                      />
-                      <span>{item.name}</span>
-                    </div>
-                  ),
-                  countryData: item,
-                }))}
-                onChange={(selected) => {
-                  if (selected) {
-                    setCountry(selected.countryData.name);
-                  }
-                }}
-              />
-              <label className="flex items-start text-sm mt-3 gap-2">
-                <input
-                  name="mails"
-                  value={mails}
-                  onChange={handleChange}
-                  type="checkbox"
-                  className="mt-1 border-green-700 py"
-                />
-                <span>
-                  Send me helpful emails to find rewarding work and job leads.
-                </span>
-              </label>
-              <label className="flex items-start text-sm gap-2 mt-3">
-                <input
-                  name="terms"
-                  value={terms}
-                  onChange={handleChange}
-                  type="checkbox"
-                  className="mt-1"
-                />
-                <span>
-                  Yes, I understand and agree to the{" "}
-                  <a href="#" className="text-green-600 underline">
-                    Upwork Terms of Service
-                  </a>
-                  , including the{" "}
-                  <a href="#" className="text-green-600 underline">
-                    User Agreement
-                  </a>{" "}
-                  and{" "}
-                  <a href="#" className="text-green-600 underline">
-                    Privacy Policy
-                  </a>
-                  .
-                </span>
-              </label>
             </div>
 
             <button
               onClick={handelSubmitData}
               type="button"
-              className="w-full mt-5 flex items-center justify-center bg-green-600 text-white py-2 rounded-md hover:bg-green-700"
+              className={`w-full mt-5 flex items-center font-semibold cursor-pointer justify-center  gap-2.5  py-2 rounded-md  ${
+                userLoading
+                  ? "hover:bg-gray-400 bg-gray-300 text-white"
+                  : "hover:bg-green-700 bg-green-600 text-white"
+              }   `}
             >
-              Create my account
-              <PuffLoader size={20} />
+              {userLoading ? (
+                <>
+                  {" "}
+                  Creating your account <PuffLoader
+                    size={20}
+                    color="white"
+                  />{" "}
+                </>
+              ) : (
+                "    Create my account"
+              )}
             </button>
 
             {/* Log in link */}

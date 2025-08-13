@@ -6,8 +6,12 @@ import toast from "react-hot-toast";
 
 // create initials States
 
+
+let isUser = JSON.parse(localStorage.getItem('user'))
+
+
 const initialState = {
-    user: "",
+    user: isUser ? isUser : null,
     userLoading: false,
     userError: false,
     userSuccess: false,
@@ -16,19 +20,15 @@ const initialState = {
 
 
 
-export const regUsers = createAsyncThunk("register", async (userData, thunkAPI) => {
-
-    console.log(userData);
-
+export const regUser = createAsyncThunk("register", async (userData, thunkAPI) => {
     try {
         let response = await axios.post("http://localhost:5174/api/users/register-Users", userData)
         localStorage.setItem('user', JSON.stringify(response.data))
 
+
         return response.data
 
     } catch (error) {
-        console.log(error);
-
         return thunkAPI.rejectWithValue(error.response.data.message)
     }
 
@@ -42,25 +42,36 @@ export const regUsers = createAsyncThunk("register", async (userData, thunkAPI) 
 export const authSlice = createSlice({
     name: "user",
     initialState,
-    reducers: {},
+    reducers: {
+
+        userReset: (state) => {
+            state.userError = false
+            state.userLoading = false
+            state.userSuccess = false
+            state.userMessage = ""
+
+        }
+
+    },
     extraReducers: (builder) => {
 
 
         builder
-            .addCase(regUsers.pending, (state, action) => {
+            .addCase(regUser.pending, (state, action) => {
 
                 state.userLoading = true
             })
 
-            .addCase(regUsers.rejected, (state, action) => {
+            .addCase(regUser.rejected, (state, action) => {
                 state.userLoading = false
                 state.userError = true
                 state.userMessage = action.payload
             })
 
 
-            .addCase(regUsers.fulfilled, (state, action) => {
+            .addCase(regUser.fulfilled, (state, action) => {
                 state.userError = false
+                state.userLoading = false
                 state.userSuccess = true
                 state.user = action.payload
             })
@@ -73,3 +84,4 @@ export const authSlice = createSlice({
 
 //now export it to store
 export default authSlice.reducer
+export const { userReset } = authSlice.actions

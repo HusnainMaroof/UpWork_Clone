@@ -9,7 +9,7 @@ export const registerUsers = async (req, res) => {
     const { f_name, l_name, email, password, country, terms, mails, role } = req.body
 
 
-    if (!f_name, !l_name, !email, !password, !country, !terms, !mails, !role) {
+    if (!f_name || !l_name || !email || !password || !country || !terms || !role) {
         res.status(401)
         throw new Error('Please enter all the relavent fields')
     }
