@@ -5,17 +5,17 @@ import Home from "./pages/Home";
 import { Toaster } from "react-hot-toast";
 import FirstSignUpScreen from "./components/FirstSignUpScreen";
 import OTPVarification from "./components/OTP";
-import Work from "./components/Work";
+import Work from "./pages/Work";
 const App = () => {
   return (
     <>
       <Toaster />
       <Router>
         <Routes>
-          <Route path="/" element={<Home />}/>
-          <Route path="/FirstSignUpScreen" element={<FirstSignUpScreen />}/>
-          <Route path="/otp-verification" element={<OTPVarification />}/>
-          <Route path="/Work" element={<Work />}/>
+          <Route path="/" element={<Home />} />
+          <Route path="/sign-up" element={<FirstSignUpScreen />} />
+          <Route path="/otp-verification" element={<OTPVarification />} />
+          <Route path="/Work" element={<Work />} />
         </Routes>
       </Router>
     </>

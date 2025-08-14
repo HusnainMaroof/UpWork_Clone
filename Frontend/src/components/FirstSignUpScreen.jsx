@@ -1,10 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SecondSignUpScreen from "./SecondSignUpScreen";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const FirstSignUpScreen = () => {
   const [role, setRole] = useState("");
   let [secondScreen, setSecondScreen] = useState(false);
 
+  const { user } = useSelector((state) => state.auth);
+  let navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/work");
+    }
+  }, []);
   return (
     <>
       {secondScreen ? (

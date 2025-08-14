@@ -128,12 +128,11 @@ const SecondSignUpScreen = ({ role, setRole }) => {
   };
 
   useEffect(() => {
-    let userEmail = JSON.parse(localStorage.getItem("user"));
     if (userError) {
       toast.error(userMessage);
     } else if (userSuccess) {
-      toast.success(`we have send an otp to your Email : ${userEmail.email} `);
-    navigate("/otp-verification");
+      toast.success(`we have send an otp to your Email : ${user.email} `);
+      navigate("/otp-verification");
     }
     dispatch(userReset());
   }, [userError, userSuccess]);
@@ -146,6 +145,12 @@ const SecondSignUpScreen = ({ role, setRole }) => {
       regUser({ f_name, l_name, email, password, country, terms, mails, role })
     );
   };
+
+    useEffect(() => {
+      if (user) {
+        navigate("/work");
+      }
+    }, []);
 
   return (
     <>
@@ -370,15 +375,13 @@ const SecondSignUpScreen = ({ role, setRole }) => {
                     "& .MuiOutlinedInput-root": {
                       "& input::placeholder": {
                         color: `${
-                          formSubmitted && email.trim() === ""
-                            ? "red"
-                            : "#9ca3af"
+                          formSubmitted && email.trim() === "" ? "red" : "green"
                         }`, // default placeholder
                         opacity: 1,
                       },
                       "&.Mui-focused input::placeholder": {
                         color: `${
-                          formSubmitted && email.trim() === "" ? "red" : "gray"
+                          formSubmitted && email.trim() === "" ? "red" : "green"
                         }`,
                       },
                       "& fieldset": {

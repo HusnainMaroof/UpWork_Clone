@@ -50,7 +50,18 @@ export const authSlice = createSlice({
             state.userSuccess = false
             state.userMessage = ""
 
-        }
+        },
+
+
+        logOut: (state) => {
+            state.user = null
+            state.userError = false
+            state.userLoading = false
+            state.userSuccess = false
+            state.userMessage = ""
+            localStorage.removeItem("user");
+
+        },
 
     },
     extraReducers: (builder) => {
@@ -85,3 +96,4 @@ export const authSlice = createSlice({
 //now export it to store
 export default authSlice.reducer
 export const { userReset } = authSlice.actions
+export const { logOut } = authSlice.actions
